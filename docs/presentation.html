@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<style>
+@page { size: 1280px 720px; margin: 0; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI','Manrope',system-ui,sans-serif; color:#e6edf3; }
+.slide { width:1280px; height:720px; padding:64px 84px; position:relative;
+  background:#0d1117; page-break-after:always; overflow:hidden; }
+.slide::before { content:""; position:absolute; inset:0;
+  background:radial-gradient(700px 400px at 85% -10%, rgba(88,166,255,.14), transparent 60%),
+             radial-gradient(600px 380px at -5% 110%, rgba(188,140,255,.10), transparent 60%); }
+.slide > * { position:relative; z-index:1; }
+h1 { font-size:52px; font-weight:800; line-height:1.15; }
+h2 { font-size:38px; font-weight:700; margin-bottom:30px; color:#fff; }
+h2 .n { color:#58a6ff; font-weight:800; margin-right:14px; }
+p, li { font-size:21px; line-height:1.55; color:#c9d1d9; }
+li { margin-bottom:12px; margin-left:26px; }
+b { color:#fff; }
+.accent { color:#58a6ff; font-weight:700; }
+.purple { color:#bc8cff; font-weight:700; }
+.cols { display:flex; gap:44px; }
+.col { flex:1; }
+.card { background:#161b22; border:1px solid #30363d; border-radius:14px; padding:22px 26px; margin-bottom:16px; }
+.card h3 { font-size:22px; color:#58a6ff; margin-bottom:8px; }
+.tag { display:inline-block; background:#1f6feb33; color:#79c0ff; border:1px solid #1f6feb66;
+  border-radius:20px; padding:4px 16px; font-size:17px; margin:4px 6px 0 0; }
+.foot { position:absolute; bottom:30px; left:84px; right:84px; display:flex;
+  justify-content:space-between; font-size:15px; color:#8b949e; }
+.code { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:20px 24px;
+  font-family:Consolas,monospace; font-size:18px; color:#79c0ff; line-height:1.6; }
+.big { font-size:64px; font-weight:800; color:#58a6ff; }
+table { border-collapse:collapse; width:100%; font-size:19px; }
+td, th { border:1px solid #30363d; padding:10px 14px; text-align:left; color:#c9d1d9; }
+th { background:#161b22; color:#fff; }
+</style></head><body>
+
+<div class="slide">
+  <div style="margin-top:120px">
+    <h1>Помощник первокурсника<br>ИВТ МИЭМ НИУ ВШЭ</h1>
+    <p style="font-size:26px; margin-top:28px; color:#8b949e">
+      Q&A-система по официальным программам 25 дисциплин 1 курса · 2026/2027</p>
+    <div style="margin-top:36px">
+      <span class="tag">BM25-поиск</span><span class="tag">RAG</span>
+      <span class="tag">0 зависимостей</span><span class="tag">опциональная LLM</span>
+      <span class="tag">источники-ссылки</span>
+    </div>
+  </div>
+  <div class="foot"><span>Отбор в Школу ВК · 2026</span><span>Рубцов Илья, БИВ265</span></div>
+</div>
+
+<div class="slide">
+  <h2><span class="n">01</span>Что делает решение</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card"><h3>Отвечает на вопросы</h3>
+        <p>по содержанию дисциплин, формулам оценивания, литературе,
+        преподавателям, срокам и связям между курсами — по любому вопросу
+        первокурсника к программам.</p></div>
+      <div class="card"><h3>Показывает источники</h3>
+        <p>Каждый ответ сопровождается ссылками на конкретные разделы
+        официальных программ на hse.ru — ответ всегда проверяем.</p></div>
+    </div>
+    <div class="col">
+      <div class="card"><h3>Корпус</h3>
+        <p><b>25 дисциплин</b> 1 курса ИВТ за 2026/2027: от «Алгебры и геометрии»
+        до проектных семинаров, включая углублённые курсы. Скрейпер
+        скачивает и парсит страницы автоматически.</p></div>
+      <div class="card"><h3>Три интерфейса</h3>
+        <p>Веб-чат, CLI и API — всё на стандартной библиотеке Python,
+        запускается одной командой без установки зависимостей.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Помощник первокурсника ИВТ</span><span>2 / 10</span></div>
+</div>
+
+<div class="slide">
+  <h2><span class="n">02</span>Как это устроено</h2>
+  <div class="code" style="font-size:20px">
+вопрос → нормализация (стемминг + синонимы: «матан», «дискретка», «прога»)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ <b>BM25</b>-поиск по фрагментам программ (~360 чанков)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ бусты: упомянутая дисциплина ×2.5 + релевантный раздел («Элементы контроля», «Литература»…)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ краткий ответ: экстрактивная выжимка <b>или</b> внешняя LLM по найденным фрагментам<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ источники: дисциплина + раздел + ссылка
+  </div>
+  <div class="cols" style="margin-top:26px">
+    <div class="col card"><h3>Пайплайн данных</h3>
+      <p>Скрейпер → структурированный JSON (разделы, элементы контроля,
+      литература, метаданные) → чанкинг с очисткой от футера и хлебных крошек.</p></div>
+    <div class="col card"><h3>Гибридный ответ</h3>
+      <p>Офлайн: экстрактивная выжимка ключевых строк. С ключом API —
+      любая OpenAI-совместимая LLM, но строго по найденным фрагментам.</p></div>
+  </div>
+  <div class="foot"><span>Помощник первокурсника ИВТ</span><span>3 / 10</span></div>
+</div>
+
+<div class="slide">
+  <h2><span class="n">03</span>Почему такой подход</h2>
+  <ul>
+    <li><b>Данные — официальные и структурированные.</b> Программы на hse.ru уже
+      содержат ответы в явном виде, поэтому <span class="accent">достоверный поиск + выжимка</span>
+      решают задачу точнее и дешевле, чем генерация «из головы» LLM.</li>
+    <li><b>Проверяемость важнее красоты.</b> Студент должен видеть, откуда взят ответ —
+      каждый ответ ссылается на раздел конкретной программы.</li>
+    <li><b>RLM-схема (retrieval → LLM → sources).</b> LLM подключается опционально
+      и только переформулирует найденное — галлюцинации сведены к минимуму.</li>
+    <li><b>Ноль зависимостей.</b> BM25, стеммер и веб-сервер написаны на чистом
+      Python: решение запускается у любого проверяющего одной командой.</li>
+    <li><b>Офлайн-режим по умолчанию</b> — не нужен ключ API, чтобы попробовать.</li>
+  </ul>
+  <div class="foot"><span>Помощник первокурсника ИВТ</span><span>4 / 10</span></div>
+</div>
+
+<div class="slide">
+  <h2><span class="n">04</span>Живой пример</h2>
+  <div class="cols">
+    <div class="col card" style="margin-top:0">
+      <h3>Вопрос</h3>
+      <p style="color:#79c0ff">«Как сдаётся математический анализ?»</p>
+      <h3 style="margin-top:18px">Ответ помощника</h3>
+      <p>Элементы контроля: Контрольная работа по материалам модуля,
+      Коллоквиум по материалам раздела, Аудиторная работа, Экзамены
+      по итогам 1–3 семестров.<br><br>
+      Формула: 0.05 × Аудиторная работа + 0.15 × Коллоквиум + 0.15 × Контрольная
+      работа + 0.5 × Экзамен.<br><br>
+      📄 <span class="accent">Математический анализ — Элементы контроля (hse.ru)</span></p>
+    </div>
+    <div class="col">
+      <div class="card"><h3>Что здесь работает</h3>
+        <ul style="font-size:19px">
+          <li>разговорное название курса распознано;</li>
+          <li>вопрос про оценивание → поднят раздел «Элементы контроля»;</li>
+          <li>собрана и формула, и перечень мероприятий;</li>
+          <li>источник — конкретный раздел программы.</li>
+        </ul></div>
+      <div class="card"><h3>Веб-интерфейс</h3>
+        <p>Чат с плашками источников — скриншот в README репозитория.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Помощник первокурсника ИВТ</span><span>5 / 10</span></div>
+</div>
+
+<div class="slide">
+  <h2><span class="n">05</span>Тестирование: 30 вопросов</h2>
+  <table>
+    <tr><th>Тип</th><th>Кол-во</th><th>Что проверяли</th><th>Результат</th></tr>
+    <tr><td>Корректная работа</td><td>20</td>
+      <td>содержание, оценивание, литература, преподаватели, кредиты,
+      модули, связи дисциплин, перечень курсов</td>
+      <td><span class="accent">18/20 — точный ответ + верный источник</span></td></tr>
+    <tr><td>Демонстрация недостатков</td><td>10</td>
+      <td>вопросы вне корпуса, агрегации, субъективные, генерация, опечатки</td>
+      <td><span class="purple">все 10 воспроизводимо показывают границы</span></td></tr>
+  </table>
+  <p style="margin-top:24px">Полные вопросы и ответы: <b>docs/test_results.md</b> в репозитории.</p>
+  <div class="foot"><span>Помощник первокурсника ИВТ</span><span>6 / 10</span></div>
+</div>
+
+<div class="slide">
+  <h2><span class="n">06</span>Где решение ошибается</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card"><h3>Вопросы вне корпуса</h3>
+        <p>«В какое время идут пары?», «какие дедлайны?» — расписание и дедлайны
+        не входят в программы. Помощник может <b>притянуть нерелевантный
+        фрагмент</b> вместо честного «не знаю».</p></div>
+      <div class="card"><h3>Агрегация между документами</h3>
+        <p>«Сколько всего кредитов за год?» — нужно просуммировать 25 программ;
+        поиск по фрагментам этого не умеет.</p></div>
+      <div class="card"><h3>Субъективные вопросы</h3>
+        <p>«Что сложнее: физика или дискретка?» — в корпусе нет основы для
+        сравнения, система всё равно выдаёт «ближайший» текст.</p></div>
+    </div>
+    <div class="col">
+      <div class="card"><h3>Экстрактивный режим</h3>
+        <p>Иногда — набор строк вместо связного ответа; чувствителен к
+        формулировкам, склейке строк и опечаткам («gjxtve yf ujhtj» не
+        распознаётся).</p></div>
+      <div class="card"><h3>Базовый vs углублённый</h3>
+        <p>При неоднозначной формулировке может смешать версии курса
+        (кредиты 11 у базовой физики и 9 у углублённой).</p></div>
+      <div class="card"><h3>Генерация контента</h3>
+        <p>«Напиши конспект лекции» — вне задачи; система выдаёт темы, но не
+        учебный материал.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Помощник первокурсника ИВТ</span><span>7 / 10</span></div>
+</div>
+
+<div class="slide">
+  <h2><span class="n">07</span>Что улучшил бы за два дня</h2>
+  <ul>
+    <li><b>1. Семантический поиск.</b> Заменить/дополнить BM25 эмбеддингами
+      (например, многозязычная sentence-transformers модель): снимет проблемы
+      с синонимами, опечатками и разговорными формулировками.</li>
+    <li><b>2. Детектор «вне корпуса».</b> Порог релевантности + классификатор
+      вопроса: честное «этого нет в программах» вместо притянутых фрагментов.</li>
+    <li><b>3. Агрегации и сравнения.</b> Прекомпилированная таблица метаданных
+      (кредиты, модули, часы) для ответов типа «сколько кредитов за год».</li>
+    <li><b>4. LLM-слоу по умолчанию.</b> Подключить бесплатный OpenAI-совместимый
+      endpoint, чтобы связные ответы были не опцией, а стандартом.</li>
+    <li><b>5. Многоходовые вопросы.</b> Декомпозиция вопроса и несколько циклов
+      поиска для «связанных» запросов (пререквизиты → постреквизиты).</li>
+  </ul>
+  <div class="foot"><span>Помощник первокурсника ИВТ</span><span>8 / 10</span></div>
+</div>
+
+<div class="slide">
+  <h2><span class="n">08</span>Итоги и артефакты</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card"><h3>Готово</h3>
+        <ul style="font-size:19px">
+          <li>корпус из 25 программ, автообновление скрейпером;</li>
+          <li>поиск + ответы с источниками, офлайн;</li>
+          <li>веб-чат, CLI, API — без зависимостей;</li>
+          <li>30 тестовых вопросов с разбором;</li>
+          <li>презентация.</li>
+        </ul></div>
+    </div>
+    <div class="col">
+      <div class="card"><h3>Сдаётся</h3>
+        <p>🔗 Открытый репозиторий: исходный код + инструкция запуска (README)<br><br>
+        🧪 Результаты тестирования на 30 вопросах: docs/test_results.md<br><br>
+        📊 Презентация: docs/presentation.pdf</p></div>
+      <div class="card"><h3>Запуск за 10 секунд</h3>
+        <div class="code">git clone &lt;repo&gt; && cd isct-freshman-assistant<br>python3 server.py&nbsp; # → localhost:8000</div></div>
+    </div>
+  </div>
+  <div class="foot"><span>Помощник первокурсника ИВТ</span><span>9 / 10</span></div>
+</div>
+
+<div class="slide">
+  <div style="margin-top:200px; text-align:center">
+    <h1 style="font-size:64px">Спасибо за внимание!</h1>
+    <p style="font-size:24px; margin-top:24px; color:#8b949e">
+      Вопросы, код, тесты и презентация — в открытом репозитории</p>
+    <div style="margin-top:44px">
+      <span class="tag" style="font-size:20px">python3 server.py</span>
+      <span class="tag" style="font-size:20px">→ localhost:8000</span>
+    </div>
+  </div>
+  <div class="foot"><span>Отбор в Школу ВК · 2026</span><span>Рубцов Илья, БИВ265 · 10 / 10</span></div>
+</div>
+
+</body></html>
