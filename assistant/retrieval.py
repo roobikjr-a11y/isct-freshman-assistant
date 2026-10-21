@@ -156,6 +156,12 @@ def detect_course(query: str) -> list[str]:
         t_stems = {x for x in stem_tokens(tokenize(t)) if len(x) > 3}
         if len(t_stems) >= 2 and t_stems <= q_stems:
             hits.append(t)
+        elif len(t_stems) == 1:
+            # однословные курсы: «Информатика», «Физика» — сравниваем по стему-префиксу
+            st = next(iter(t_stems))
+            if len(st) > 4 and any(qs == st or qs.startswith(st)
+                                   for qs in q_stems if len(qs) > 4):
+                hits.append(t)
     return list(dict.fromkeys(hits))
 
 
